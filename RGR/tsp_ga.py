@@ -18,6 +18,7 @@ from PIL import Image
 def distance(city1, city2):
     return np.linalg.norm(city1 - city2)
 
+
 def route_length(route, cities):
     total = 0.0
     n = len(route)
@@ -25,8 +26,10 @@ def route_length(route, cities):
         total += distance(cities[route[i]], cities[route[(i + 1) % n]])
     return total
 
+
 def fitness(route, cities):
     return 1.0 / (1e-6 + route_length(route, cities))
+
 
 def init_population(pop_size, n_cities):
     population = []
@@ -47,6 +50,7 @@ def selection(population, cities, k=3):
         best = max(candidates, key=lambda ind: fitness(ind, cities))
         selected.append(best[:])
     return selected
+
 
 def pmx_crossover(parent1, parent2):
     n = len(parent1)
@@ -78,6 +82,7 @@ def pmx_crossover(parent1, parent2):
     assert len(set(child)) == n
     return child
 
+
 def ox_crossover(parent1, parent2):
     size = len(parent1)
     child = [-1] * size
@@ -91,6 +96,7 @@ def ox_crossover(parent1, parent2):
             child[ptr] = city
     return child
 
+
 def cx_crossover(parent1, parent2):
     size = len(parent1)
     child = [-1] * size
@@ -102,6 +108,7 @@ def cx_crossover(parent1, parent2):
         if child[i] == -1:
             child[i] = parent2[i]
     return child
+
 
 def mutate(individual, mutation_rate=0.02):
     for i in range(len(individual)):
@@ -130,8 +137,10 @@ def genetic_algorithm_with_history(
         log_callback("=" * 60)
         log_callback(f"🚀 ЗАПУСК ГА (TSP)")
         log_callback(f" Городов: {n_cities} | Популяция: {pop_size}")
-        log_callback(f" Поколений: {generations} | Мутация: {mutation_rate:.2%}")
-        log_callback(f" Элита: {elite_size} | Кроссовер: {crossover_func.__name__}")
+        log_callback(
+            f" Поколений: {generations} | Мутация: {mutation_rate:.2%}")
+        log_callback(
+            f" Элита: {elite_size} | Кроссовер: {crossover_func.__name__}")
         log_callback("-" * 60)
         log_callback(f"{'Пок':>4} | {'Лучший':>8} | {'Средний':>8} | Прогресс")
 
@@ -147,7 +156,8 @@ def genetic_algorithm_with_history(
             bars = "█" * int(progress * bar_width)
             spaces = " " * (bar_width - len(bars))
             bar_str = f"[{bars}{spaces}] {int(progress * 100):>3}%"
-            log_callback(f"{gen+1:>4} | {best_len:>8.3f} | {avg_len:>8.3f} | {bar_str}")
+            log_callback(
+                f"{gen+1:>4} | {best_len:>8.3f} | {avg_len:>8.3f} | {bar_str}")
 
         elite_indices = np.argsort(lengths)[:elite_size]
         elite = [population[i][:] for i in elite_indices]
@@ -167,7 +177,7 @@ def genetic_algorithm_with_history(
         log_callback("-" * 60)
         log_callback(f"✅ ЗАВЕРШЕНО. Лучший маршрут: {best_len:.4f}")
         log_callback("=" * 60)
-    
+
     return best_per_gen
 
 
@@ -187,9 +197,11 @@ def animate_in_tkinter(cities, best_history, parent_window, save_gif=False, gif_
 
     ax.scatter(cities[:, 0], cities[:, 1], c='red', s=100, zorder=5)
     for i, (x, y) in enumerate(cities):
-        ax.text(x + 0.01, y + 0.01, str(i), fontsize=10, color='darkred', fontweight='bold')
+        ax.text(x + 0.01, y + 0.01, str(i), fontsize=10,
+                color='darkred', fontweight='bold')
 
-    line, = ax.plot([], [], 'b-o', lw=2, markersize=7, markerfacecolor='lightblue', markeredgecolor='navy')
+    line, = ax.plot([], [], 'b-o', lw=2, markersize=7,
+                    markerfacecolor='lightblue', markeredgecolor='navy')
 
     canvas = FigureCanvasTkAgg(fig, master=anim_win)
     canvas.get_tk_widget().pack(fill="both", expand=True)
@@ -198,6 +210,7 @@ def animate_in_tkinter(cities, best_history, parent_window, save_gif=False, gif_
     control_frame.pack(pady=5)
 
     is_paused = tk.BooleanVar(value=False)
+
     def toggle_pause():
         is_paused.set(not is_paused.get())
         btn_pause.config(text="▶ Продолжить" if is_paused.get() else "⏸ Пауза")
@@ -205,10 +218,12 @@ def animate_in_tkinter(cities, best_history, parent_window, save_gif=False, gif_
     btn_pause = ttk.Button(control_frame, text="⏸ Пауза", command=toggle_pause)
     btn_pause.pack(side="left", padx=5)
 
-    btn_close = ttk.Button(control_frame, text="❌ Закрыть", command=anim_win.destroy)
+    btn_close = ttk.Button(
+        control_frame, text="❌ Закрыть", command=anim_win.destroy)
     btn_close.pack(side="left", padx=5)
 
-    status_label = ttk.Label(control_frame, text="Поколение: 0 / 0", font=("Arial", 10))
+    status_label = ttk.Label(
+        control_frame, text="Поколение: 0 / 0", font=("Arial", 10))
     status_label.pack(side="left", padx=10)
 
     frames = []
@@ -216,7 +231,8 @@ def animate_in_tkinter(cities, best_history, parent_window, save_gif=False, gif_
 
     def update_frame(frame_idx=0):
         if frame_idx >= len(best_history):
-            status_label.config(text="✅ Анимация завершена", foreground="green")
+            status_label.config(
+                text="✅ Анимация завершена", foreground="green")
             return
 
         if is_paused.get():
@@ -232,7 +248,8 @@ def animate_in_tkinter(cities, best_history, parent_window, save_gif=False, gif_
         )
         canvas.draw()
 
-        status_label.config(text=f"Поколение: {frame_idx+1} / {len(best_history)}")
+        status_label.config(
+            text=f"Поколение: {frame_idx+1} / {len(best_history)}")
 
         if save_gif:
             buf = io.BytesIO()
@@ -260,10 +277,12 @@ def animate_in_tkinter(cities, best_history, parent_window, save_gif=False, gif_
                 )
                 messagebox.showinfo("✅ Успешно", f"GIF сохранён:\n{gif_path}")
             except Exception as e:
-                messagebox.showerror("❌ Ошибка", f"Не удалось сохранить GIF:\n{e}")
+                messagebox.showerror(
+                    "❌ Ошибка", f"Не удалось сохранить GIF:\n{e}")
         anim_win.destroy()
 
     anim_win.protocol("WM_DELETE_WINDOW", on_close)
+
 
 def plot_convergence(histories, labels, title="Сравнение операторов кроссовера"):
     plt.figure(figsize=(10, 6))
@@ -271,7 +290,8 @@ def plot_convergence(histories, labels, title="Сравнение операто
     for i, (hist, label) in enumerate(zip(histories, labels)):
         color = colors[i % len(colors)]
         plt.plot(hist['best_lengths'], label=f"Лучший ({label})", color=color)
-        plt.plot(hist['avg'], '--', alpha=0.7, label=f"Средний ({label})", color=color)
+        plt.plot(hist['avg'], '--', alpha=0.7,
+                 label=f"Средний ({label})", color=color)
     plt.xlabel("Поколение")
     plt.ylabel("Длина маршрута")
     plt.title(title)
@@ -279,6 +299,7 @@ def plot_convergence(histories, labels, title="Сравнение операто
     plt.legend()
     plt.tight_layout()
     plt.show()
+
 
 def animate_single_route(cities, route, length, parent_window, save_gif=False, gif_path="tsp_evolution.gif", fps=60):
     anim_win = tk.Toplevel(parent_window)
@@ -294,10 +315,12 @@ def animate_single_route(cities, route, length, parent_window, save_gif=False, g
 
     ax.scatter(cities[:, 0], cities[:, 1], c='red', s=100, zorder=5)
     for i, (x, y) in enumerate(cities):
-        ax.text(x + 0.01, y + 0.01, str(i), fontsize=10, color='darkred', fontweight='bold')
+        ax.text(x + 0.01, y + 0.01, str(i), fontsize=10,
+                color='darkred', fontweight='bold')
 
     coords = np.array([cities[i] for i in route] + [cities[route[0]]])
-    line, = ax.plot(coords[:, 0], coords[:, 1], 'b-o', lw=2, markersize=7, markerfacecolor='lightblue', markeredgecolor='navy')
+    line, = ax.plot(coords[:, 0], coords[:, 1], 'b-o', lw=2, markersize=7,
+                    markerfacecolor='lightblue', markeredgecolor='navy')
 
     canvas = FigureCanvasTkAgg(fig, master=anim_win)
     canvas.get_tk_widget().pack(fill="both", expand=True)
@@ -305,7 +328,8 @@ def animate_single_route(cities, route, length, parent_window, save_gif=False, g
     control_frame = ttk.Frame(anim_win)
     control_frame.pack(pady=5)
 
-    btn_close = ttk.Button(control_frame, text="❌ Закрыть", command=anim_win.destroy)
+    btn_close = ttk.Button(
+        control_frame, text="❌ Закрыть", command=anim_win.destroy)
     btn_close.pack(side="left", padx=5)
 
     ax.set_title(f"Лучший маршрут\nДлина: {length:.3f}", fontsize=12)
@@ -339,7 +363,9 @@ def animate_single_route(cities, route, length, parent_window, save_gif=False, g
 
 # 5. Графический интерфейс
 
+
 crossover_func_global = "PMX"
+
 
 class TSPApp:
     def __init__(self, root):
@@ -356,60 +382,84 @@ class TSPApp:
         self.setup_ui()
 
     def setup_ui(self):
-        param_frame = ttk.LabelFrame(self.root, text="Параметры задачи", padding=10)
+        param_frame = ttk.LabelFrame(
+            self.root, text="Параметры задачи", padding=10)
         param_frame.pack(fill="x", padx=10, pady=5)
 
-        ttk.Label(param_frame, text="Городов:").grid(row=0, column=0, sticky="w")
+        ttk.Label(param_frame, text="Городов:").grid(
+            row=0, column=0, sticky="w")
         self.n_cities_var = tk.IntVar(value=20)
-        ttk.Spinbox(param_frame, from_=3, to=20, textvariable=self.n_cities_var, width=5).grid(row=0, column=1, padx=5)
+        ttk.Spinbox(param_frame, from_=3, to=20, textvariable=self.n_cities_var, width=5).grid(
+            row=0, column=1, padx=5)
 
-        ttk.Label(param_frame, text="Seed:").grid(row=0, column=2, sticky="w", padx=(15,5))
+        ttk.Label(param_frame, text="Seed:").grid(
+            row=0, column=2, sticky="w", padx=(15, 5))
         self.seed_var = tk.StringVar(value="50")
-        ttk.Entry(param_frame, textvariable=self.seed_var, width=24).grid(row=0, column=3, padx=5)
-        ttk.Label(param_frame, text="(пусто = случайный)").grid(row=0, column=4, sticky="w", padx=(5,0))
+        ttk.Entry(param_frame, textvariable=self.seed_var,
+                  width=24).grid(row=0, column=3, padx=5)
+        ttk.Label(param_frame, text="(пусто = случайный)").grid(
+            row=0, column=4, sticky="w", padx=(5, 0))
 
         self.input_mode = tk.StringVar(value="auto")
-        ttk.Radiobutton(param_frame, text="Случайная генерация", variable=self.input_mode, value="auto").grid(row=1, column=0, columnspan=2, sticky="w", pady=(5,0))
-        ttk.Radiobutton(param_frame, text="Ввести вручную", variable=self.input_mode, value="manual").grid(row=1, column=2, columnspan=2, sticky="w", pady=(5,0))
-        self.btn_coords = ttk.Button(param_frame, text="📝 Ввести координаты", command=self.open_coords_window)
-        self.btn_coords.grid(row=1, column=4, padx=(10,0), pady=(5,0))
+        ttk.Radiobutton(param_frame, text="Случайная генерация", variable=self.input_mode, value="auto").grid(
+            row=1, column=0, columnspan=2, sticky="w", pady=(5, 0))
+        ttk.Radiobutton(param_frame, text="Ввести вручную", variable=self.input_mode, value="manual").grid(
+            row=1, column=2, columnspan=2, sticky="w", pady=(5, 0))
+        self.btn_coords = ttk.Button(
+            param_frame, text="📝 Ввести координаты", command=self.open_coords_window)
+        self.btn_coords.grid(row=1, column=4, padx=(10, 0), pady=(5, 0))
         self.btn_coords.config(state="disabled")
-        self.input_mode.trace("w", lambda *a: self.btn_coords.config(state="normal" if self.input_mode.get()=="manual" else "disabled"))
+        self.input_mode.trace("w", lambda *a: self.btn_coords.config(
+            state="normal" if self.input_mode.get() == "manual" else "disabled"))
 
         ga_frame = ttk.LabelFrame(self.root, text="Параметры ГА", padding=10)
         ga_frame.pack(fill="x", padx=10, pady=5)
 
-        ttk.Label(ga_frame, text="Популяция:").grid(row=0, column=0, sticky="w")
+        ttk.Label(ga_frame, text="Популяция:").grid(
+            row=0, column=0, sticky="w")
         self.pop_size_var = tk.IntVar(value=70)
-        ttk.Spinbox(ga_frame, from_=10, to=200, textvariable=self.pop_size_var, width=6).grid(row=0, column=1, padx=5)
+        ttk.Spinbox(ga_frame, from_=10, to=200, textvariable=self.pop_size_var, width=6).grid(
+            row=0, column=1, padx=5)
 
-        ttk.Label(ga_frame, text="Поколения:").grid(row=0, column=2, sticky="w", padx=(15,0))
+        ttk.Label(ga_frame, text="Поколения:").grid(
+            row=0, column=2, sticky="w", padx=(15, 0))
         self.generations_var = tk.IntVar(value=100)
-        ttk.Spinbox(ga_frame, from_=10, to=500, textvariable=self.generations_var, width=6).grid(row=0, column=3, padx=5)
+        ttk.Spinbox(ga_frame, from_=10, to=500, textvariable=self.generations_var, width=6).grid(
+            row=0, column=3, padx=5)
 
-        ttk.Label(ga_frame, text="Мутация:").grid(row=1, column=0, sticky="w", pady=5)
+        ttk.Label(ga_frame, text="Мутация:").grid(
+            row=1, column=0, sticky="w", pady=5)
         self.mutation_var = tk.DoubleVar(value=0.04)
-        ttk.Spinbox(ga_frame, from_=0.0, to=1.0, increment=0.01, textvariable=self.mutation_var, width=6).grid(row=1, column=1, padx=5)
+        ttk.Spinbox(ga_frame, from_=0.0, to=1.0, increment=0.01,
+                    textvariable=self.mutation_var, width=6).grid(row=1, column=1, padx=5)
 
-        ttk.Label(ga_frame, text="Элита:").grid(row=1, column=2, sticky="w", padx=(15,0), pady=5)
+        ttk.Label(ga_frame, text="Элита:").grid(
+            row=1, column=2, sticky="w", padx=(15, 0), pady=5)
         self.elite_var = tk.IntVar(value=2)
-        ttk.Spinbox(ga_frame, from_=0, to=10, textvariable=self.elite_var, width=6).grid(row=1, column=3, padx=5)
+        ttk.Spinbox(ga_frame, from_=0, to=10, textvariable=self.elite_var, width=6).grid(
+            row=1, column=3, padx=5)
 
-        crossover_frame = ttk.LabelFrame(self.root, text="Оператор кроссовера", padding=10)
+        crossover_frame = ttk.LabelFrame(
+            self.root, text="Оператор кроссовера", padding=10)
         crossover_frame.pack(fill="x", padx=10, pady=5)
         self.cross_var = tk.StringVar(value="all")
         for i, (text, val) in enumerate([("PMX", "pmx"), ("OX", "ox"), ("CX", "cx"), ("Все три", "all")]):
-            ttk.Radiobutton(crossover_frame, text=text, variable=self.cross_var, value=val).pack(side="left", padx=8)
+            ttk.Radiobutton(crossover_frame, text=text, variable=self.cross_var, value=val).pack(
+                side="left", padx=8)
 
         btn_frame = ttk.Frame(self.root)
         btn_frame.pack(pady=10)
-        self.btn_run = ttk.Button(btn_frame, text="🚀 Запустить ГА", command=self.run_ga)
+        self.btn_run = ttk.Button(
+            btn_frame, text="🚀 Запустить ГА", command=self.run_ga)
         self.btn_run.pack(side="left", padx=5)
-        self.btn_animate = ttk.Button(btn_frame, text="🎬 Анимация", command=self.show_animation, state="disabled")
+        self.btn_animate = ttk.Button(
+            btn_frame, text="🎬 Анимация", command=self.show_animation, state="disabled")
         self.btn_animate.pack(side="left", padx=5)
-        self.btn_save_gif = ttk.Button(btn_frame, text="💾 Сохранить GIF", command=self.save_gif, state="disabled")
+        self.btn_save_gif = ttk.Button(
+            btn_frame, text="💾 Сохранить GIF", command=self.save_gif, state="disabled")
         self.btn_save_gif.pack(side="left", padx=5)
-        self.btn_show_plot = ttk.Button(btn_frame, text="📈 График", command=self.show_convergence_plot, state="disabled")
+        self.btn_show_plot = ttk.Button(
+            btn_frame, text="📈 График", command=self.show_convergence_plot, state="disabled")
         self.btn_show_plot.pack(side="left", padx=5)
 
         self.progress = ttk.Progressbar(self.root, mode='determinate')
@@ -417,7 +467,8 @@ class TSPApp:
 
         log_frame = ttk.LabelFrame(self.root, text="Лог выполнения", padding=5)
         log_frame.pack(fill="both", expand=True, padx=10, pady=5)
-        self.log_text = scrolledtext.ScrolledText(log_frame, height=12, font=("Consolas", 9))
+        self.log_text = scrolledtext.ScrolledText(
+            log_frame, height=12, font=("Consolas", 9))
         self.log_text.pack(fill="both", expand=True)
         self.log_text.config(state="disabled")
 
@@ -450,13 +501,15 @@ class TSPApp:
         canvas = tk.Canvas(win)
         scrollbar = ttk.Scrollbar(win, orient="vertical", command=canvas.yview)
         scrollable_frame = ttk.Frame(canvas)
-        scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        scrollable_frame.bind("<Configure>", lambda e: canvas.configure(
+            scrollregion=canvas.bbox("all")))
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
 
         entries = []
         for i in range(n):
-            ttk.Label(scrollable_frame, text=f"Город {i}:").grid(row=i, column=0, padx=5, pady=2, sticky="w")
+            ttk.Label(scrollable_frame, text=f"Город {i}:").grid(
+                row=i, column=0, padx=5, pady=2, sticky="w")
             x_ent = ttk.Entry(scrollable_frame, width=8)
             y_ent = ttk.Entry(scrollable_frame, width=8)
             x_ent.grid(row=i, column=1, padx=2)
@@ -476,7 +529,8 @@ class TSPApp:
             except Exception as e:
                 messagebox.showerror("Ошибка", f"Неверный формат:\n{e}")
 
-        ttk.Button(scrollable_frame, text="OK", command=on_ok).grid(row=n, column=0, columnspan=3, pady=10)
+        ttk.Button(scrollable_frame, text="OK", command=on_ok).grid(
+            row=n, column=0, columnspan=3, pady=10)
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
@@ -497,17 +551,19 @@ class TSPApp:
 
             if self.input_mode.get() == "manual":
                 if self.cities is None:
-                    messagebox.showwarning("Внимание", "Сначала введите координаты!")
+                    messagebox.showwarning(
+                        "Внимание", "Сначала введите координаты!")
                     return
                 cities = self.cities
-                self.log(f"✅ Используем ручные координаты ({len(cities)} городов).")
+                self.log(
+                    f"✅ Используем ручные координаты ({len(cities)} городов).")
             else:
                 if seed is None:
                     seed = int(time.time() * 100000) % (2**32 - 1)
                     self.log(f"🌱 Использован случайный seed: {seed}")
                 else:
                     self.log(f"🌱 Использован seed: {seed}")
-                
+
                 seed = self.set_seed(seed)
                 n = self.n_cities_var.get()
                 cities = np.random.rand(n, 2)
@@ -546,27 +602,29 @@ class TSPApp:
                             log_callback=self.log
                         )
 
-                        best_lengths = [route_length(r, cities) for r in best_hist]
-                        avg_lengths = [np.mean(best_lengths[max(0, i-4):i+1]) for i in range(len(best_lengths))]
+                        best_lengths = [route_length(
+                            r, cities) for r in best_hist]
+                        avg_lengths = [np.mean(best_lengths[max(0, i-4):i+1])
+                                       for i in range(len(best_lengths))]
 
-                        self.histories.append({'best_lengths': best_lengths, 'best_routes': best_hist, 'avg': avg_lengths})
+                        self.histories.append(
+                            {'best_lengths': best_lengths, 'best_routes': best_hist, 'avg': avg_lengths})
 
                         if func == funcs[-1]:
                             self.best_history = best_hist
 
-
-                    self.root.after(0, lambda: self.on_ga_complete(cities, labels, seed))
+                    self.root.after(
+                        0, lambda: self.on_ga_complete(cities, labels, seed))
                 except Exception as e:
                     err_msg = str(e)
                     tb_msg = traceback.format_exc()
-                    self.root.after(0, lambda em=err_msg, tm=tb_msg: 
-                        messagebox.showerror("❌ Ошибка", f"{em}\n\n{tm}"))
+                    self.root.after(0, lambda em=err_msg, tm=tb_msg:
+                                    messagebox.showerror("❌ Ошибка", f"{em}\n\n{tm}"))
 
             threading.Thread(target=ga_worker, daemon=True).start()
 
         except Exception as e:
             messagebox.showerror("❌ Ошибка", str(e))
-
 
     def on_ga_complete(self, cities, labels, seed):
         # Разблокируем кнопки в начале
@@ -603,15 +661,16 @@ class TSPApp:
             self.log("Кроссовер | Поколение достижения цели")
             self.log("-" * 42)
             for i, (hist, label) in enumerate(zip(self.histories, self.labels)):
-                G_eps = self.calculate_convergence_generation(hist['best_lengths'], epsilon)
+                G_eps = self.calculate_convergence_generation(
+                    hist['best_lengths'], epsilon)
                 self.log(f"{label:<9} | {G_eps:>25}")
             self.log("="*50)
         else:
             self.log(f"\n📊 Скорость сходимости (ε = {epsilon:.0%}):")
             for i, (hist, label) in enumerate(zip(self.histories, self.labels)):
-                G_eps = self.calculate_convergence_generation(hist['best_lengths'], epsilon)
+                G_eps = self.calculate_convergence_generation(
+                    hist['best_lengths'], epsilon)
                 self.log(f"  • {label}: {G_eps} поколений")
-            
 
     def show_animation(self):
         if not hasattr(self, 'best_history_for_animation') or self.cities is None:
@@ -628,7 +687,6 @@ class TSPApp:
         except Exception as e:
             messagebox.showerror("❌ Ошибка анимации", str(e))
 
-            
     def save_gif(self):
         if not self.best_history or self.cities is None:
             messagebox.showwarning("Внимание", "Сначала запустите ГА!")
@@ -663,7 +721,7 @@ class TSPApp:
     def calculate_convergence_generation(self, best_lengths, epsilon=0.01):
         if not best_lengths:
             return None
-        
+
         L_star = min(best_lengths)
         L_target = L_star * (1 + epsilon)
 
